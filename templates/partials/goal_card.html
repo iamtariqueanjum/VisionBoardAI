@@ -1,0 +1,58 @@
+<div class="goal-card">
+    <div class="goal-header">
+        <div>
+            <div class="goal-title">
+                <i class="{{ get_category_icon(goal.category) }}"></i>
+                {{ goal.title }}
+            </div>
+            {% if goal.category %}
+                <span class="goal-category">{{ goal.category|title }}</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if goal.description %}
+        <div class="goal-description">{{ goal.description }}</div>
+    {% endif %}
+    
+    <div class="goal-meta">
+        <div>
+            {% if goal.deadline %}
+                <i class="fas fa-calendar"></i> {{ goal.deadline|format_date }}
+            {% endif %}
+            {% if goal.created_at %}
+                <br><small><i class="fas fa-clock"></i> {{ goal.created_at|time_ago }}</small>
+            {% endif %}
+        </div>
+        <span class="priority-badge {{ get_priority_color(goal.priority) }}">
+            {{ goal.priority|title }}
+        </span>
+    </div>
+    
+    <div class="goal-actions">
+        {% if goal.id %}
+            {% if request.endpoint == 'view_goal' %}
+                <a href="{{ url_for('edit_goal', goal_id=goal.id) }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-arrow-left"></i> Back to Goals
+                </a>
+            {% else %}
+                <a href="{{ url_for('view_goal', goal_id=goal.id) }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-eye"></i> View
+                </a>
+                <a href="{{ url_for('edit_goal', goal_id=goal.id) }}" class="btn btn-secondary btn-sm">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                <form method="POST" action="{{ url_for('delete_goal', goal_id=goal.id) }}" 
+                      style="display: inline;" 
+                      onsubmit="return confirm('Are you sure you want to delete this goal?')">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="fas fa-trash"></i> Delete
+                    </button>
+                </form>
+            {% endif %}
+        {% endif %}
+    </div>
+</div> 

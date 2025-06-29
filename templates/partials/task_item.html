@@ -1,0 +1,21 @@
+<div class="task-item" data-task-id="{{ task.id }}">
+    <label class="task-checkbox">
+        <input type="checkbox" 
+               class="task-toggle" 
+               data-goal-id="{{ goal.id }}" 
+               data-task-id="{{ task.id }}"
+               {{ 'checked' if task.completed else '' }}>
+        <span class="checkmark"></span>
+    </label>
+    <div class="task-content">
+        <div class="task-description {{ 'completed' if task.completed else '' }}">
+            {{ task.description }}
+        </div>
+        <div class="task-meta">
+            <span class="task-week">Week {{ task.week }}</span>
+            {% if task.created_at %}
+                <span class="task-date">{{ task.created_at|time_ago }}</span>
+            {% endif %}
+        </div>
+    </div>
+</div> 
