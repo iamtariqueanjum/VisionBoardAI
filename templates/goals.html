@@ -1,0 +1,673 @@
+{% extends "base.html" %}
+
+{% block title %}VisionBoardAI - Goal Management{% endblock %}
+
+{% block styles %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+
+    .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .content {
+        padding: 40px;
+    }
+
+    .flash-messages {
+        margin-bottom: 30px;
+    }
+
+    .flash {
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        font-weight: 500;
+    }
+
+    .flash.success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .flash.error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        margin-bottom: 40px;
+    }
+
+    .form-section, .goals-section {
+        background: #f8f9fa;
+        padding: 30px;
+        border-radius: 15px;
+        border: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+        margin-bottom: 25px;
+        color: #333;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-control.error {
+        border-color: #dc3545;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .priority-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .priority-btn {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #e9ecef;
+        background: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+
+    .priority-btn:hover {
+        border-color: #667eea;
+    }
+
+    .priority-btn.active {
+        background: #667eea;
+        color: white;
+        border-color: #667eea;
+    }
+
+    .btn {
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-sm {
+        padding: 8px 15px;
+        font-size: 0.9rem;
+    }
+
+    .goals-list {
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    .goal-card {
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .goal-card:hover {
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+
+    .goal-header {
+        display: flex;
+        justify-content: between;
+        align-items: flex-start;
+        margin-bottom: 10px;
+    }
+
+    .goal-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 5px;
+    }
+
+    .goal-category {
+        background: #e9ecef;
+        color: #6c757d;
+        padding: 4px 8px;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .goal-description {
+        color: #666;
+        margin-bottom: 15px;
+        line-height: 1.5;
+    }
+
+    .goal-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+    .priority-badge {
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .priority-high {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .priority-medium {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .priority-low {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .goal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px;
+        color: #888;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 20px;
+        opacity: 0.5;
+    }
+
+    /* AI Section Styles */
+    .ai-section {
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .ai-section h3 {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+
+    .ai-prompt {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px dashed #dee2e6;
+    }
+
+    .ai-prompt p {
+        margin-bottom: 15px;
+        color: #666;
+    }
+
+    /* Task Styles */
+    .tasks-list {
+        margin-top: 20px;
+    }
+
+    .tasks-list h4 {
+        margin-bottom: 15px;
+        color: #333;
+        font-size: 1.1rem;
+    }
+
+    .task-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 15px;
+        padding: 15px;
+        background: white;
+        border: 1px solid #e9ecef;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .task-item:hover {
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .task-checkbox {
+        position: relative;
+        display: inline-block;
+        cursor: pointer;
+        margin-top: 2px;
+    }
+
+    .task-checkbox input[type="checkbox"] {
+        opacity: 0;
+        position: absolute;
+        cursor: pointer;
+    }
+
+    .checkmark {
+        height: 20px;
+        width: 20px;
+        background-color: #fff;
+        border: 2px solid #ddd;
+        border-radius: 4px;
+        display: inline-block;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .task-checkbox input:checked ~ .checkmark {
+        background-color: #667eea;
+        border-color: #667eea;
+    }
+
+    .task-checkbox input:checked ~ .checkmark:after {
+        content: '';
+        position: absolute;
+        left: 6px;
+        top: 2px;
+        width: 5px;
+        height: 10px;
+        border: solid white;
+        border-width: 0 2px 2px 0;
+        transform: rotate(45deg);
+    }
+
+    .task-content {
+        flex: 1;
+    }
+
+    .task-description {
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 5px;
+        line-height: 1.4;
+    }
+
+    .task-description.completed {
+        text-decoration: line-through;
+        color: #888;
+    }
+
+    .task-meta {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+    .task-week {
+        background: #e9ecef;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    /* Goal Details Styles */
+    .goal-details .goal-card {
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 768px) {
+        .main-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1><i class="fas fa-bullseye"></i> VisionBoardAI</h1>
+        <p>Break down long-term goals into actionable weekly tasks</p>
+    </div>
+
+    <div class="content">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="main-grid">
+            <!-- Goal Input Form -->
+            <div class="form-section">
+                <h2 class="section-title">
+                    <i class="fas fa-plus-circle"></i>
+                    {% if goal and editing %}Edit Goal{% else %}Add New Goal{% endif %}
+                </h2>
+
+                {% macro render_form_field(field_name, field_type='text', field_label=None, field_value='', field_placeholder='', field_required=false, field_options=None) %}
+                    <div class="form-group">
+                        <label for="{{ field_name }}">{{ field_label or field_name|title }} {% if field_required %}*{% endif %}</label>
+                        {% if field_type == 'textarea' %}
+                            <textarea id="{{ field_name }}" name="{{ field_name }}" class="form-control" 
+                                      placeholder="{{ field_placeholder }}">{{ field_value }}</textarea>
+                        {% elif field_type == 'select' %}
+                            <select id="{{ field_name }}" name="{{ field_name }}" class="form-control">
+                                <option value="">Select a {{ field_name }}</option>
+                                {% for option_value, option_label in field_options %}
+                                    <option value="{{ option_value }}" {{ 'selected' if field_value == option_value else '' }}>
+                                        {{ option_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% else %}
+                            <input type="{{ field_type }}" id="{{ field_name }}" name="{{ field_name }}" 
+                                   class="form-control" value="{{ field_value }}" 
+                                   placeholder="{{ field_placeholder }}" {{ 'required' if field_required else '' }}>
+                        {% endif %}
+                    </div>
+                {% endmacro %}
+
+                <form method="POST" action="{{ url_for('add_goal') if not goal else url_for('edit_goal', goal_id=goal.id) }}">
+                    {{ render_form_field('title', 'text', 'Goal Title', goal.title if goal else '', 'e.g., Learn Python Programming', true) }}
+                    
+                    {{ render_form_field('description', 'textarea', 'Description', goal.description if goal else '', 'Describe your goal in detail...') }}
+                    
+                    {% set category_options = [
+                        ('career', 'Career'),
+                        ('health', 'Health & Fitness'),
+                        ('education', 'Education'),
+                        ('finance', 'Finance'),
+                        ('relationships', 'Relationships'),
+                        ('personal', 'Personal Development'),
+                        ('hobby', 'Hobbies')
+                    ] %}
+                    {{ render_form_field('category', 'select', 'Category', goal.category if goal else '', '', false, category_options) }}
+                    
+                    {{ render_form_field('deadline', 'date', 'Deadline', goal.deadline if goal else '') }}
+
+                    <div class="form-group">
+                        <label>Priority</label>
+                        <div class="priority-buttons">
+                            {% for priority in ['low', 'medium', 'high'] %}
+                                <button type="button" class="priority-btn {{ 'active' if (not goal and priority == 'medium') or (goal and goal.priority == priority) else '' }}" 
+                                        data-priority="{{ priority }}">{{ priority|title }}</button>
+                            {% endfor %}
+                        </div>
+                        <input type="hidden" id="priority" name="priority" 
+                               value="{{ goal.priority if goal else 'medium' }}">
+                    </div>
+
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            {% if goal and editing %}Update Goal{% else %}Add Goal{% endif %}
+                        </button>
+                        {% if goal and editing %}
+                            <a href="{{ url_for('view_goal', goal_id=goal.id) }}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+
+            <!-- Goals List or Goal Details -->
+            <div class="goals-section">
+                {% if goal and not editing %}
+                    <!-- Goal Details View -->
+                    <h2 class="section-title">
+                        <i class="fas fa-bullseye"></i>
+                        Goal Details
+                    </h2>
+                    
+                    <div class="goal-details">
+                        {% include 'partials/goal_card.html' %}
+                        
+                        <!-- AI Task Generation -->
+                        <div class="ai-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-robot"></i>
+                                AI Weekly Task Generator
+                            </h3>
+                            
+                            {% if goal.weekly_tasks %}
+                                <div class="tasks-list">
+                                    <h4>Generated Weekly Tasks:</h4>
+                                    {% for task in goal.weekly_tasks %}
+                                        {% include 'partials/task_item.html' %}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="ai-prompt">
+                                    <p>Let AI help you break down this goal into actionable weekly tasks!</p>
+                                    <form method="POST" action="{{ url_for('generate_tasks', goal_id=goal.id) }}">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-magic"></i> Generate Weekly Tasks
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Goals List View -->
+                    <h2 class="section-title">
+                        <i class="fas fa-list"></i>
+                        Your Goals ({{ goals|length }})
+                    </h2>
+
+                    <div class="goals-list">
+                        {% if goals %}
+                            {% for goal in goals %}
+                                {% include 'partials/goal_card.html' %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-bullseye"></i>
+                                <h3>No goals yet</h3>
+                                <p>Start by adding your first goal using the form on the left!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Priority button functionality
+    document.querySelectorAll('.priority-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Remove active class from all buttons
+            document.querySelectorAll('.priority-btn').forEach(b => b.classList.remove('active'));
+            // Add active class to clicked button
+            this.classList.add('active');
+            // Update hidden input
+            document.getElementById('priority').value = this.dataset.priority;
+        });
+    });
+
+    // Form validation
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const title = document.getElementById('title').value.trim();
+        if (!title) {
+            e.preventDefault();
+            document.getElementById('title').classList.add('error');
+            alert('Please enter a goal title');
+            return false;
+        }
+        document.getElementById('title').classList.remove('error');
+    });
+
+    // Remove error class on input
+    document.getElementById('title').addEventListener('input', function() {
+        this.classList.remove('error');
+    });
+
+    // Task checkbox functionality
+    document.querySelectorAll('.task-toggle').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const goalId = this.dataset.goalId;
+            const taskId = this.dataset.taskId;
+            const isChecked = this.checked;
+            
+            // Update visual state immediately
+            const taskDescription = this.closest('.task-item').querySelector('.task-description');
+            if (isChecked) {
+                taskDescription.classList.add('completed');
+            } else {
+                taskDescription.classList.remove('completed');
+            }
+            
+            // Send AJAX request to update server
+            fetch(`/goals/${goalId}/tasks/${taskId}/toggle`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    // Revert if there was an error
+                    this.checked = !isChecked;
+                    if (isChecked) {
+                        taskDescription.classList.remove('completed');
+                    } else {
+                        taskDescription.classList.add('completed');
+                    }
+                    alert('Error updating task status');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Revert on error
+                this.checked = !isChecked;
+                if (isChecked) {
+                    taskDescription.classList.remove('completed');
+                } else {
+                    taskDescription.classList.add('completed');
+                }
+                alert('Error updating task status');
+            });
+        });
+    });
+</script>
+{% endblock %} 
